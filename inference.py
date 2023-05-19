@@ -9,7 +9,7 @@ from models import Wav2Lip
 import platform
 import logging
 import datetime
-logging.basicConfig(filename='/mnt/HDD500/FlaskApp/logfile.log', level=logging.INFO)
+logging.basicConfig(filename='logfile.log', level=logging.INFO)
 # create a logging object
 logger = logging.getLogger(__name__)
 
