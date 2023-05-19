@@ -1,0 +1,3 @@
+conda init --all
+conda deactivate
+source ./venv/bin/activate

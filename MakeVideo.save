@@ -1,0 +1,3 @@
+ython inference.py --checkpoint_path /home/jack/Desktop/FlaskApp/Wav2Lip/checkpoints/wav2lip_gan.pth \
+--face "/home/jack/Desktop/FlaskApp/Wav2Lip/content/sample_data/input_video.mp4" \
+--audio "/home/jack/Desktop/FlaskApp/Wav2Lip/content/sample_data/input_audio.wav" --pads 0 20 0 0
