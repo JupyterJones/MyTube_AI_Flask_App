@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My Flask App</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</head>
+
+<body>
+  <div class="wrapper">
+    <header class="header">
+      <h1 style="color: brown;">Image Processing With Flask and Executeable Functions</h1><br />
+      <p>Below are links to various Image Processing Functions. </p>
+    
+      <form action="/search" method="GET">
+        <label for="search-term">Search:</label>
+        <input type="text" id="search-term" name="q">
+        <button type="submit">Search</button>
+    </form>
+
+    </header>
+    <a href="{{ url_for('text_mp3') }}">Create an mp3 from aText Entry</a><br />
+    <a href="{{ url_for('select_mp3') }}">convert_mp3_to_wav</a><br />
+    <a href="{{ url_for('convert_mp3_to_wav') }}">convert_mp3_to_wav</a><br />
+    <a href="{{ url_for('convert_image_to_video') }}">Create a Video the same length as the wav Created</a><br />
+    </div>
+    <footer class="footer">
+      <center>
+        &nbsp;&nbsp;<img style="width: 30%; height: auto;"
+          src="{{ url_for('static', filename='images/' + random_image_file) }}"
+          alt="Example image">&nbsp;&nbsp;&nbsp;&nbsp;
+        <img style="width: 30%; height: auto;" src="{{ url_for('static', filename='images/image2.jpg') }}"
+          alt="Example image"><br />&nbsp;&nbsp;&nbsp;
+      </center>
+      <h2 style="color: brown;">Links to YouTube Channels</h2>
+      <a href="https://www.youtube.com/@totallyinsaneart3345" target="_blank ">Totally Insane Art</a><br />
+      <a href="https://www.youtube.com/@JackNorthrup" target="_blank ">Jack Northrup</a><br />
+      <a href="https://app.prodia.com/#/" target="_blank ">prodia</a><br />
+      <a href="https://app.leonardo.ai/" target="_blank ">leonardo.ai</a><br />
+    </footer>
+  </div>
+
+</body>
+
+</html>

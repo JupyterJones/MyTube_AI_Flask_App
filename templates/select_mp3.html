@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Select MP3</title>
+  </head>
+  <body>
+    <h1>Select MP3</h1>
+    <form action="{{ url_for('select_mp3') }}" method="POST">
+      <label for="selected_mp3">Select an MP3 file:</label>
+      <select name="selected_mp3" id="selected_mp3">
+        {% for mp3_file in mp3_files %}
+        <option value="{{ mp3_file }}">{{ mp3_file }}</option>
+        {% endfor %}
+      </select>
+      <br>
+      <input type="submit" value="Select">
+    </form>
+  </body>
+</html>

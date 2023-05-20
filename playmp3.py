@@ -1,4 +1,4 @@
-#!/mnt/HDD500/FlaskApp/Wav2Lip/venv/bin/python
+#!venv/bin/python
 # ---------- playmp3.py ----------------
 from gtts import gTTS
 import os

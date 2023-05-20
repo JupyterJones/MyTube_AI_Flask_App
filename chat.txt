@@ -1,0 +1,923 @@
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    
+    phrase = request.form['phrase']
+    with open('chat.txt', 'r') as file:
+        lines = file.readlines()
+    results = []
+    for i, line in enumerate(lines):
+        if phrase in line:
+            start = max(0, i-5)
+            end = min(len(lines), i+6)
+            context = lines[start:end]
+            for j, context_line in enumerate(context):
+                if phrase in context_line:
+                    results.append(f'Line {start+j}: {context_line}')
+                else:
+                    results.append(f'Line {start+j}: {context_line}')
+    return render_template('results.html', results=results)
+
+# -------- search.html ----------------
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Page</title>
+</head>
+<body>
+    <h1>Search</h1>
+    <form method="POST" action="{{ url_for('search') }}">
+        <input type="text" name="phrase" placeholder="Enter your search phrase">
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    file "/home/jack/Desktop/FLASK/app.py", line 292, in search
+
+    phrase = request.form['phrase']
+
+    File "/home/jack/Desktop/FLASK/flask_venv/lib/python3.8/site-packages/werkzeug/datastructures.py", line 375, in __getitem__
+
+    raise exceptions.BadRequestKeyError(key)
+
+    werkzeug.exceptions.BadRequestKeyError: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
+    KeyError: 'phrase'
+
+
+
+from flask import Flask, render_template
+from PIL import Image
+import os
+import random
+import imageio
+
+app = Flask(__name__)
+
+@app.route("/make_animation")
+def make_animation():
+    # Get a list of all files in the final_images directory
+    image_files = os.listdir("static/final_images")
+    
+    # Select 20 random files from the list
+    selected_files = random.sample(image_files, 20)
+    
+    # Load each selected file, resize it to 400x600, and save it to a temporary directory
+    resized_images = []
+    for filename in selected_files:
+        with Image.open("static/final_images/" + filename) as img:
+            img = img.resize((400, 600))
+            temp_filename = "static/tmp/" + filename
+            img.save(temp_filename)
+            resized_images.append(temp_filename)
+    
+    # Create an animated GIF from the resized images
+    current_datetime = datetime.now()
+    str_current_datetime = str(current_datetime)
+    gif_name = "static/animated_gifs/"+str_current_datetime+"animated.gif"
+    with imageio.get_writer(gif_filename, mode='I', duration=1) as writer:
+        for filename in resized_images:
+            image = imageio.imread(filename)
+            writer.append_data(image)
+    
+    # Return a template that displays the GIF
+    return render_template("make_animation.html", gif_filename=gif_filename)
+
+what do i need to make the file: make_animation.html
+
+--------------------- make_animation.html ----------------
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Animated GIF</title>
+</head>
+<body>
+	<img src="{{ gif_filename }}" alt="Animated GIF">
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import os
+from PIL import Image
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+@app.route('/add_border')
+def add_border():
+    images = os.listdir('static/images/')
+    thumbnails = []
+    for image in images:
+        with Image.open('static/images/'+image) as img:
+            img.thumbnail((200, 200))
+            thumbnail_name = 'thumbnail_'+image
+            img.save('static/thumbnails/'+thumbnail_name)
+            thumbnails.append(thumbnail_name)
+    return render_template('add_border.html', images=images, thumbnails=thumbnails)
+
+@app.route('/select_border')
+def select_border():
+    borders = os.listdir('static/transparent_borders/')
+    return render_template('select_border.html', borders=borders)
+
+@app.route('/apply_border', methods=['POST'])
+def apply_border():
+    selected_image = request.form['image']
+    selected_border = request.form['border']
+    try:
+        with Image.open('static/images/'+selected_image) as img:
+            with Image.open('static/transparent_borders/'+selected_border) as border:
+                img = img.resize(border.size)
+                img.paste(border, (0, 0), border)
+                final_image_name = 'final_'+selected_image
+                img.save('static/final_images/'+final_image_name)
+        return render_template('final_image.html', final_image=final_image_name, message='Border applied successfully.')
+    except Exception as e:
+        error_message = f'An error occurred: {str(e)}. Please try again.'
+        return render_template('apply_border.html', image=selected_image, border=selected_border, error_message=error_message)
+
+@app.route('/select_border_image', methods=['GET'])
+def select_border_image():
+    try:
+        image = request.args.get('image')
+        if not image:
+            raise ValueError('No image selected.')
+        return render_template('select_border.html', image=image, borders=os.listdir('static/transparent_borders/'))
+    except Exception as e:
+        error_message = f'An error occurred: {str(e)}. Please try again.'
+        return render_template('add_border.html', error_message=error_message)
+
+# ------------ final_image.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Final Image</title>
+  </head>
+  <body>
+    <h1>Final Image</h1>
+    <p>{{ message }}</p>
+    <img src="{{ url_for('static', filename='final_images/'+final_image) }}" alt="{{ final_image }}">
+  </body>
+</html>
+
+# ----------apply_border.html ------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Applied Border</title>
+  </head>
+  <body>
+    <h1>Applied Border</h1>
+    {% if error_message %}
+    <p style="color:red">{{ error_message }}</p>
+    {% endif %}
+    <img src="{{ url_for('static', filename='images/'+image) }}" alt="{{ image }}" style="border: 10px solid transparent; box-shadow: 0 0 0 10px #fff, 0 0 0 15px #000;">
+    <br>
+    <img src="{{ url_for('static', filename='transparent_borders/'+border) }}" alt="{{ border }}" style="position: absolute; top: 0; left: 0;">
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import os
+from PIL import Image
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+@app.route('/add_border')
+def add_border():
+    try:
+        images = os.listdir('static/images/')
+        thumbnails = []
+        for image in images:
+            with Image.open('static/images/'+image) as img:
+                img.thumbnail((200, 200))
+                thumbnail_name = 'thumbnail_'+image
+                img.save('static/thumbnails/'+thumbnail_name)
+                thumbnails.append(thumbnail_name)
+        return render_template('add_border.html', images=images, thumbnails=thumbnails)
+    except:
+        return 'Error: Could not load images.'
+
+@app.route('/select_border')
+def select_border():
+    try:
+        borders = os.listdir('static/transparent_borders/')
+        return render_template('select_border.html', borders=borders)
+    except:
+        return 'Error: Could not load borders.'
+
+@app.route('/apply_border', methods=['POST'])
+def apply_border():
+    try:
+        selected_image = request.form['image']
+        selected_border = request.form['border']
+        with Image.open('static/images/'+selected_image) as img:
+            with Image.open('static/transparent_borders/'+selected_border) as border:
+                img = img.resize(border.size)
+                img.paste(border, (0, 0), border)
+                final_image_name = 'final_'+selected_image
+                img.save('static/final_images/'+final_image_name)
+        return render_template('final_image.html', final_image=final_image_name)
+    except:
+        return 'Error: Could not apply border.'
+
+@app.route('/view_image')
+def view_image():
+    try:
+        image = request.args.get('image')
+        return render_template('apply_border.html', image=image)
+    except:
+        return 'Error: Could not view image.'
+
+@app.route('/')
+def index():
+    return 'Hello, World!'
+
+if __name__ == '__main__':
+    app.run()
+
+----------------- add to app.py ----
+
+
+@app.route('/add_border')
+def add_border():
+    images = os.listdir('static/images/')
+    thumbnails = []
+    for image in images:
+        with Image.open('static/images/'+image) as img:
+            img.thumbnail((200, 200))
+            thumbnail_name = 'thumbnail_'+image
+            img.save('static/thumbnails/'+thumbnail_name)
+            thumbnails.append(thumbnail_name)
+    return render_template('add_border.html', images=images, thumbnails=thumbnails)
+
+@app.route('/select_border')
+def select_border():
+    borders = os.listdir('static/transparent_borders/')
+    return render_template('select_border.html', borders=borders)
+
+@app.route('/apply_border', methods=['POST'])
+def apply_border():
+    selected_image = request.form['image']
+    selected_border = request.form['border']
+    with Image.open('static/images/'+selected_image) as img:
+        with Image.open('static/transparent_borders/'+selected_border) as border:
+            img = img.resize(border.size)
+            img.paste(border, (0, 0), border)
+            final_image_name = 'final_'+selected_image
+            img.save('static/final_images/'+final_image_name)
+    return render_template('final_image.html', final_image=final_image_name)
+
+
+# ------------ final_image.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Final Image</title>
+  </head>
+  <body>
+    <h1>Final Image</h1>
+    <img src="{{ url_for('static', filename='final_images/'+final_image) }}" alt="{{ final_image }}">
+  </body>
+</html>
+
+# ----------apply_border.html ------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Applied Border</title>
+  </head>
+  <body>
+    <h1>Applied Border</h1>
+    <img src="{{ url_for('static', filename='images/'+image) }}" alt="{{ image }}" style="border: 10px solid transparent; box-shadow: 0 0 0 10px #fff, 0 0 0 15px #000;">
+    <br>
+    <img src="{{ url_for('static', filename='transparent_borders/'+border) }}" alt="{{ border }}" style="position: absolute; top: 0; left: 0;">
+  </body>
+</html>
+-------------  select_border.html ----------------------------
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Select Border</title>
+  </head>
+  <body>
+    <h1>Select Border</h1>
+    <form method="POST" action="{{ url_for('apply_border') }}">
+      <input type="hidden" name="image" value="{{ request.args.get('image') }}">
+      {% for border in borders %}
+        <img src="{{ url_for('static', filename='transparent_borders/'+border) }}" alt="{{ border }}" width="200" height="200">
+        <input type="radio" name="border" value="{{ border }}"><br>
+      {% endfor %}
+      <input type="submit" value="Apply Border">
+    </form>
+  </body>
+</html>
+
+
+
+-------------  select_border.html ----------------------------
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Select Border</title>
+  </head>
+  <body>
+    <h1>Select Border</h1>
+    <form method="POST" action="{{ url_for('apply_border') }}">
+      <input type="hidden" name="image" value="{{ request.args.get('image') }}">
+      {% for border in borders %}
+        <img src="{{ url_for('static', filename='transparent_borders/'+border) }}" alt="{{ border }}" width="200" height="200">
+        <input type="radio" name="border" value="{{ border }}"><br>
+      {% endfor %}
+      <input type="submit" value="Apply Border">
+    </form>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------- add to app.py ----
+
+
+@app.route('/add_border')
+def add_border():
+    images = os.listdir('static/images/')
+    thumbnails = []
+    for image in images:
+        with Image.open('static/images/'+image) as img:
+            img.thumbnail((200, 200))
+            thumbnail_name = 'thumbnail_'+image
+            img.save('static/thumbnails/'+thumbnail_name)
+            thumbnails.append(thumbnail_name)
+    return render_template('add_border.html', images=images, thumbnails=thumbnails)
+
+@app.route('/select_border')
+def select_border():
+    borders = os.listdir('static/transparent_borders/')
+    return render_template('select_border.html', borders=borders)
+
+@app.route('/apply_border', methods=['POST'])
+def apply_border():
+    selected_image = request.form['image']
+    selected_border = request.form['border']
+    with Image.open('static/images/'+selected_image) as img:
+        with Image.open('static/transparent_borders/'+selected_border) as border:
+            img = img.resize(border.size)
+            img.paste(border, (0, 0), border)
+            final_image_name = 'final_'+selected_image
+            img.save('static/final_images/'+final_image_name)
+    return render_template('final_image.html', final_image=final_image_name)
+
+
+==============================================
+==============================================
+==============================================
+
+
+
+
+
+
+@app.route('/view_thumbs')
+def view_thumbs():
+    # Define the directory where the images are located
+    image_directory = '/home/jack/Desktop/FLASK/static/images/uploads'
+    # Get a list of all the image files in the directory
+    image_files = [f for f in os.listdir(image_directory) if f.endswith('.jpg') or f.endswith('.png')]
+    # Create a list of dictionaries containing the image file name and URL
+    image_list = [{'name': f, 'url': f'/images/{f}'} for f in image_files]
+    # Render the template with the list of images
+    return render_template('view_thumbs.html', image_list=image_list)
+
+@app.route('/images/uploads/<filename>')
+def image(filename):
+    # Define the directory where the images are located
+    image_directory = '/home/jack/Desktop/FLASK/static/images/uploads'
+    # Generate the full path to the requested image file
+    image_path = os.path.join(image_directory, filename)
+    # Return the image file as a response
+    return open(image_path, 'rb').read()
+
+#--view_thumbs.html----------
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Thumbnail Gallery</title>
+</head>
+<body>
+    <h1>Thumbnail Gallery</h1>
+    <div class="gallery">
+        {% for url in image_urls %}
+        <div class="thumbnail">
+            <a href="{{ url }}">
+                <img src="{{ url }}" width="100" height="150">
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+
+-----------------------------------
+
+import os
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/view_thumbs')
+def view_thumbs():
+    # Define the directory where the images are located
+    image_directory = 'static/images/uploads'
+    # Get a list of all the image files in the directory
+    image_files = [f for f in os.listdir(image_directory) if f.endswith('.jpg') or f.endswith('.png')]
+    # Create a list of dictionaries containing the image file name and URL
+    image_list = [{'name': f, 'url': f'/images/{f}'} for f in image_files]
+    # Render the template with the list of images
+    return render_template('view_thumbs.html', image_list=image_list)
+
+@app.route('/images/uploads/<filename>')
+def image(filename):
+    # Define the directory where the images are located
+    image_directory = ''static/images/uploads'
+    # Generate the full path to the requested image file
+    image_path = os.path.join(image_directory, filename)
+    # Return the image file as a response
+    return open(image_path, 'rb').read()
+
+if __name__ == '__main__':
+    app.run()
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Thumbnail Gallery</title>
+</head>
+<body>
+    <h1>Thumbnail Gallery</h1>
+    <div class="gallery">
+        {% for url in image_urls %}
+        <div class="thumbnail">
+            <a href="{{ url }}">
+                <img src="{{ url }}" width="200" height="200">
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------
+@app.route('/process_images', methods=['POST', 'GET'])
+def process_images():
+    if request.method == 'POST':
+        # read the images from the request
+        img1 = Image.open(request.files['image1'])
+        img2 = Image.open(request.files['image2'])
+        img3 = Image.open(request.files['image3'])
+
+        # resize the images to have the same shape
+        img1 = img1.resize((img2.size[0], img2.size[1]))
+        img3 = img3.resize((img2.size[0], img2.size[1]))
+
+        # convert the mask to binary
+        mask = img2.convert('1')
+
+        # apply the mask
+        img = Image.composite(img1, img3, mask)
+
+        # save the image to a file
+        img.save('processed_image.jpg')
+
+        # encode the image to bytes
+        img_bytes = BytesIO()
+        img.save(img_bytes, format='JPEG')
+        img_bytes = img_bytes.getvalue()
+
+        # return the image as a response
+        return Response(img_bytes, mimetype='image/jpeg')
+
+    return '''
+        <!doctype html>
+        <html>
+            <body>
+                <h1>Image Processing</h1>
+                <form action="/" method="POST" enctype="multipart/form-data">
+                    <p>Select the first image:</p>
+                    <input type="file" name="image1"><br>
+                    <p>Select the second image:</p>
+                    <input type="file" name="image2"><br>
+                    <p>Select the third image:</p>
+                    <input type="file" name="image3"><br><br>
+                    <input type="submit" value="Process Images">
+                </form>
+            </body>
+        </html>
+    '''
+
+
+# import module
+from datetime import datetime
+
+# get current date and time
+
+print("Current date & time : ", current_datetime)
+
+# convert datetime obj to string
+current_datetime = datetime.now()
+str_current_datetime = str(current_datetime)
+file_name = str_current_datetime+".jpg"
+file = open(file_name, 'w')
+
+print("File created : ", file.name)
+file.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from io import BytesIO
+from PIL import Image
+
+@app.route('/process_images', methods=['POST', 'GET'])
+def process_images():
+    if request.method == 'POST':
+        # read the images from the request
+        img1 = Image.open(request.files['image1'])
+        img2 = Image.open(request.files['image2'])
+        img3 = Image.open(request.files['image3'])
+
+        # resize the images to have the same shape
+        img1 = img1.resize((img2.size[0], img2.size[1]))
+        img3 = img3.resize((img2.size[0], img2.size[1]))
+
+        # convert the mask to binary
+        mask = img2.convert('1')
+
+        # apply the mask
+        img = Image.composite(img1, img3, mask)
+
+        # save the image to a file
+        img.save('processed_image.jpg')
+
+        # encode the image to bytes
+        img_bytes = BytesIO()
+        img.save(img_bytes, format='JPEG')
+        img_bytes = img_bytes.getvalue()
+
+        # return the image as a response
+        return Response(img_bytes, mimetype='image/jpeg')
+
+    return '''
+        <!doctype html>
+        <html>
+            <body>
+                <h1>Image Processing</h1>
+                <form action="/" method="POST" enctype="multipart/form-data">
+                    <p>Select the first image:</p>
+                    <input type="file" name="image1"><br>
+                    <p>Select the second image:</p>
+                    <input type="file" name="image2"><br>
+                    <p>Select the third image:</p>
+                    <input type="file" name="image3"><br><br>
+                    <input type="submit" value="Process Images">
+                </form>
+            </body>
+        </html>
+    '''
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <img src="{{ url_for('static', filename='images/image2.jpg') }}" alt="Example image"><br />
+  <!--img src="{{ url_for('static', filename='images/' + random_image_file) }}" alt="Example image"><br /-->
+    </aside>
+
+
+ <article class="content">
+    <h1>Links and Executeable Functions</h1>
+    <p>This example uses line-based positioning, to position the header and footer, stretching them across the grid.</p>
+    <!--a href="{{ url_for('flask_info') }}">FlaskInfo</a><br />
+    <a href="{{ url_for('upload_file') }}">Upload Image</a><br />
+    <a href="{{ url_for('get_gallery') }}">View Images</a><br /-->
+
+
+
+
+
+
+
+
+
+    @app.route('/')
+def home():
+    return render_template('index.html')
+@app.route('/')
+def index():
+    random_image_file = 'example.jpg'
+    return render_template('index.html', random_image_file=random_image_file)
+
+@app.route('/')
+def index():
+    image_dir = 'static/images'
+    image_files = [f for f in os.listdir(image_dir) if f.endswith('.jpg')]
+    random_image_file = random.choice(image_files)
+    return render_template('index.html', random_image_file=random_image_file)
+
+
+
+
+
+
+
+
+
+@app.route('/upload_blends', methods=['POST', 'GET'])
+def upload_blends():
+    if request.method == 'POST':
+        # Get the uploaded images
+        img1 = request.files['img1']
+        img2 = request.files['img2']
+        img3 = request.files['img3']
+        
+        # Open the images using PIL
+        img1_pil = Image.open(img1)
+        img2_pil = Image.open(img2)
+        img3_pil = Image.open(img3)
+        
+        # Convert the images to NumPy arrays
+        from flask import Flask, render_template, request, Response
+import cv2
+import numpy as np
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('process_images.html')
+
+@app.route('/process_images', methods=['POST'])
+def process_images():
+    # read the images from the request
+    img1 = cv2.imdecode(np.fromstring(request.files['image1'].read(), np.uint8), cv2.IMREAD_COLOR)
+    img2 = cv2.imdecode(np.fromstring(request.files['image2'].read(), np.uint8), cv2.IMREAD_GRAYSCALE)
+    img3 = cv2.imdecode(np.fromstring(request.files['image3'].read(), np.uint8), cv2.IMREAD_COLOR)
+    
+    # resize the images to have the same shape
+    img1 = cv2.resize(img1, (img2.shape[1], img2.shape[0]))
+    img3 = cv2.resize(img3, (img2.shape[1], img2.shape[0]))
+
+    # convert the mask to binary
+    ret, mask = cv2.threshold(img2, 127, 255, cv2.THRESH_BINARY)
+    
+    # apply the mask
+    img = cv2.bitwise_and(img1, img1, mask=mask)
+    img = cv2.bitwise_or(img, img3)
+    
+    # encode the image to bytes
+    _, buffer = cv2.imencode('XXXXXXXX.jpg', img)
+    img_bytes = buffer.tobytes()
+    
+    # return the image as a response
+    return Response(img_bytes, mimetype='image/jpeg')
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        img1_arr = np.array(img1_pil)
+        img2_arr = np.array(img2_pil)
+        img3_arr = np.array(img3_pil)
+        
+        # Blend the images
+        blended_arr = (img1_arr + img2_arr + img3_arr) / 3
+        
+        # Normalize the image
+        blended_arr = (blended_arr - np.min(blended_arr)) / (np.max(blended_arr) - np.min(blended_arr)) * 255
+        
+        # Swap color channel order
+        blended_arr = blended_arr[:, :, ::-1]
+        
+        # Convert the array to a PIL image
+        blended_pil = Image.fromarray(blended_arr.astype('uint8'))
+
+
+        timestamp = int(time.time())
+        filename = f"blended_{timestamp}.jpg"
+        blended_pil.save(f"static/images/{filename}")
+        
+        
+          # Save the blended image
+        blended_pil.save('static/blended.jpg')
+        
+        # Generate the URL for the blended image
+        blended_imageurl = url_for('static', filename='blended.jpg')
+        
+        # Pass the URL of the blended image to the template
+        return render_template('upload_blends.html')
+
+http://127.0.0.1:5000/add_text
+I think this is working
+Text Entry: 2023-03-24 09:40:04 http://127.0.0.1:5000/add_text
+Text Entry: 2023-03-24 09:40:14 @app.route('/add_text', methods=['GET', 'POST'])
+def add_text():
+    if request.method == 'POST':
+        text = request.form['text']
+        with open('chat.txt', 'a') as file:
+            file.write(f'\n{text}')
+        return render_template('add_text.html', message='Text added successfully')
+    else:
+        return render_template('add_text.html')
+Text Entry: 2023-04-04 13:41:24 https://github.com/JenniferNorthrup/dad-lambda
+Text Entry: 2023-04-09 12:03:49 Holy Schitt Batman
+Text Entry: 2023-04-24 05:53:56 wacko
+Text Entry: 2023-04-26 09:50:08 ffmpeg -hide_banner -framerate 25 -i tinydir/%05d.jpg -c:v libx264 -pix_fmt yuv420p -y output25.mp4
+Text Entry: 2023-04-26 15:51:00 def index():
+    image_dir = 'static/images'
+    image_files = [f for f in os.listdir(image_dir) if f.endswith('.jpg')]
+    random_image_file = random.choice(image_files)
+    return render_template('index.html', random_image_file=random_image_file)
+
+
+app.secret_key = os.urandom(24)
+
+app.config['UPLOAD_FOLDER'] = 'static/images/uploads'
+app.config['RESULTS_FOLDER'] = 'static/videos/results'
+app.config['THUMBNAILS_FOLDER'] = 'static/images/thumbnails'
+#app.config['CHECKPOINT_PATH'] = '/home/jack/Desktop/FlaskApp/Wav2Lip/checkpoints/wav2lip_gan.pth'
+#app.config['AUDIO_PATH'] = '/home/jack/Desktop/FlaskApp/Wav2Lip/content/sample_data/input_audio.wav'
+ZXZXZX
