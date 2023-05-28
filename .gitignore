@@ -1,0 +1,12 @@
+# .gitignore
+
+# Ignore the uploads directory
+/uploads
+
+# Ignore the static directory
+/static
+/checkpoints
+/Thin-Plate-Spline-Motion-Model
+/venv-back
+/env
+/content

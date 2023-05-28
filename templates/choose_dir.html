@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Select Directory</title>
+<style>
+html {
+  font-family: sans-serif;
+background-color: black;
+}
+body {
+  width: 95%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: rgb(167, 196, 189);
+  color: black;
+}
+h1 {
+  color: rgb(255, 255, 255);
+}
+#wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  background-color: teal;
+}
+</style>
+</head>
+<body>
+<div id="wrapper">
+  <div>
+	<h1>Creating a speaking Avatar with A Flask App. <br />
+		Directions on <a href="{{ url_for('index') }}">Home Page</a><br /></p></h1>
+  </div>
+  <div>
+	<video controls class="resizedvideo">
+	  <source src="static/assets/result_cl.mp4" type="video/mp4">
+	  Your browser does not support the video tag.
+	</video><br />
+ 
+	<h1>Select Directory</h1>
+<form action="/choose_dir" method="post">
+    <label for="directory">Choose a directory:</label>
+    <select name="directory" id="directory">
+        {% for directory in directories %}
+            <option value="{{ directory }}">{{ directory }}</option>
+        {% endfor %}
+    </select>
+    <br><br>
+    <input type="submit" value="Generate Video">
+</form>
+
+	  
+		<video width="480" height="auto" controls>
+			<source src="static/videos/random_images_video.mp4" type="video/mp4"><br />
+			Your browser does not support the video tag.
+		</video><br />
+		
+		Your browser does not support the video tag.
+
+  </div>	
+</body>
+</html>

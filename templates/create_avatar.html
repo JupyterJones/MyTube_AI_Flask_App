@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Avatar</title>
+</head>
+<body>
+  <h1>Create Avatar</h1>
+
+  <form action="/create_avatar" method="post">
+    <input type="submit" value="Start Avatar Creation">
+  </form>
+
+  <pre id="output"></pre>
+
+  <script>
+    const outputElement = document.getElementById('output');
+
+    const eventSource = new EventSource('/create_avatar');
+    eventSource.onmessage = function(event) {
+      const line = event.data;
+      outputElement.textContent += line;
+
+      // Scroll to the bottom of the output element
+      outputElement.scrollTop = outputElement.scrollHeight;
+    };
+  </script>
+</body>
+</html>
+
+</html>

@@ -1,0 +1,44 @@
+<<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Avatar</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('form').submit(function(event) {
+                event.preventDefault();
+                var form = $(this);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    xhrFields: {
+                        onprogress: function(e) {
+                            if (e.lengthComputable) {
+                                var percent = Math.round((e.loaded / e.total) * 100);
+                                $('#progress').text(percent + '%');
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        $('#progress').text('Completed');
+                    },
+                    error: function(xhr, status, error) {
+                        $('#progress').text('Error: ' + error);
+                    },
+                    complete: function() {
+                        $('#progress').removeClass('d-none');
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Create Avatar</h1>
+    <form method="POST" action="/create_avatar">
+        <input type="submit" value="Create Avatar">
+    </form>
+    <div id="progress" class="d-none">0%</div>
+</body>
+</html>

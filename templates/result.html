@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Uploaded Image</title>
+  </head>
+  <body style="background-color:powderblue;">
+    <center>
+    <h1>Uploaded Image</h1>
+    <a style="color:red;font-size: large;" href="{{ url_for('index') }}">RETURN HOME</a><br /><br /> 
+    <img src="{{ url_for('static', filename='images/uploads/' + filename) }}" alt="Uploaded Image">
+  </center>
+  </body>
+</html>
+

@@ -1,3 +1,76 @@
+
+
+
+from flask import Response, render_template
+import subprocess
+
+@app.route('/create_avatar', methods=['GET', 'POST'])
+def create_avatar():
+    if request.method == 'POST':
+        check_point = os.path.join(app.config['CHECKPOINT_PATH'], 'checkpoints/wav2lip_gan.pth')
+        wav_filename = os.path.join(app.config['AUDIO_PATH'], 'input_audio.wav')
+        video_path = os.path.join(app.config['VIDEO_PATH'], 'input_video.mp4')
+        logger.info(f'Video path: {video_path}')
+        build_avatar = f"python inference.py --checkpoint_path {check_point} --face {video_path} --audio {wav_filename}"
+
+        def generate_output():
+            process = subprocess.Popen(build_avatar, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+            for line in iter(process.stdout.readline, b''):
+                yield line
+
+        return Response(generate_output(), mimetype='text/plain')
+    else:
+        return render_template('create_avatar.html')
+
+--------------------- create_avatar.html -------------------
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Avatar</title>
+</head>
+<body>
+  <h1>Create Avatar</h1>
+
+  <pre id="output"></pre>
+
+  <script>
+    const outputElement = document.getElementById('output');
+
+    const eventSource = new EventSource('/create_avatar');
+    eventSource.onmessage = function(event) {
+      const line = event.data;
+      outputElement.textContent += line;
+    };
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     
@@ -921,3 +994,124 @@ app.config['THUMBNAILS_FOLDER'] = 'static/images/thumbnails'
 #app.config['CHECKPOINT_PATH'] = '/home/jack/Desktop/FlaskApp/Wav2Lip/checkpoints/wav2lip_gan.pth'
 #app.config['AUDIO_PATH'] = '/home/jack/Desktop/FlaskApp/Wav2Lip/content/sample_data/input_audio.wav'
 ZXZXZX
+
+
+----------------------------------
+
+@app.route('/choose_dir', methods=['GET', 'POST'])
+def choose_dir():
+    if request.method == 'POST':
+        selected_directory = request.form.get('directory', directories)
+        TExt = "TEXT TEST"
+        logger.error('No file was selected', {TExt})
+        logger.debug('Debug was selected', {TExt})
+        if selected_directory is None:
+            # Handle the case where no directory is selected
+            logger.error('No directory selected')
+            return 'No directory selected!'
+
+        # Rest of the code...
+        # Use the selected_directory variable in your logic to generate the video
+        # Make sure to update the paths according to the selected directory
+
+        logger.debug('Selected directory:', selected_directory)
+
+        # Get the list of image files in the selected directory
+        image_filenames = random.sample(glob.glob(selected_directory + '/*.jpg'), 10)
+        logger.debug('Selected image filenames:', image_filenames)
+        
+        image_clips = []
+        for filename in image_filenames:
+            # Open the image file and resize it to 512x768
+            logger.debug('Processing image:', filename)
+            image = Image.open(filename)
+            #image = image.resize((512, 768), Image.ANTIALIAS)
+            # Convert the PIL Image object to a NumPy array
+            image_array = np.array(image)
+            # Create an ImageClip object from the resized image and set its duration to 1 second
+            image_clip = ImageClip(image_array).set_duration(1)
+            # Append the image clip to the list
+            image_clips.append(image_clip)
+
+        logger.debug('Number of image clips:', len(image_clips))
+
+        # Concatenate all the image clips into a single video clip
+        video_clip = concatenate_videoclips(image_clips, method='compose')
+        timestr = time.strftime("%Y%m%d-%H%M%S")
+        # Set the fps value for the video clip
+        video_clip.fps = 24
+        # Write the video clip to a file
+        video_file = f'static/videos/random_images_{timestr}_video.mp4'
+        output_p = 'static/videos/random_images_video.mp4'
+        logger.debug('Output video file path:', video_file)
+        logger.debug('Final video file path:', output_p)
+        
+        video_clip.write_videofile(video_file, fps=24)
+        
+        try:
+            shutil.copy(video_file, output_p)
+        except Exception as e:
+            logger.error('Error occurred while copying file:', str(e))
+            return f"Error occurred while copying file: {str(e)}"
+
+        # Return the rendered template with the list of directories and output path
+        return render_template('choose_dir.html', directories=directories, output_path=output_p)
+
+    # If the request method is GET, render the form template with the list of directories
+    output_p = 'static/videos/random_images_video.mp4'
+    return render_template('choose_dir.html', directories=directories, output_path=output_p)
+
+-----------------------------------
+
+@app.route('/choose_dir', methods=['GET', 'POST'])
+def choose_dir():
+    if request.method == 'POST':
+        selected_directory = request.form.get('directory', directories)
+        TExt = "TEXT TEST"
+        logger.error('No file was selected',{TExt})
+        logger.debug('Debug was selected',{TExt})
+        if selected_directory is None:
+            # Handle the case where no directory is selected
+            return 'No directory selected!'
+
+        # Rest of the code...
+        # Use the selected_directory variable in your logic to generate the video
+        # Make sure to update the paths according to the selected directory
+
+        # Get the list of image files in the selected directory
+        logger.debug('SELECTED', selected_directory)
+        image_filenames = random.sample(glob.glob(selected_directory + '/*.jpg'), 10)
+        image_clips = []
+        for filename in image_filenames:
+            # Open the image file and resize it to 512x768
+            image = Image.open(filename)
+            #image = image.resize((512, 768), Image.ANTIALIAS)
+            # Convert the PIL Image object to a NumPy array
+            image_array = np.array(image)
+            # Create an ImageClip object from the resized image and set its duration to 1 second
+            image_clip = ImageClip(image_array).set_duration(1)
+            # Append the image clip to the list
+            image_clips.append(image_clip)
+
+        # Concatenate all the image clips into a single video clip
+        video_clip = concatenate_videoclips(image_clips, method='compose')
+        timestr = time.strftime("%Y%m%d-%H%M%S")
+        # Set the fps value for the video clip
+        video_clip.fps = 24
+        # Write the video clip to a file
+        video_file = f'static/videos/random_images_{timestr}_video.mp4'
+        output_p = 'static/videos/random_images_video.mp4'
+        video_clip.write_videofile(video_file, fps=24)
+        try:
+            shutil.copy(video_file, output_p)
+        except Exception as e:
+            return f"Error occurred while copying file: {str(e)}"
+
+        # Return the rendered template with the list of directories and output path
+        return render_template('choose_dir.html', directories=directories, output_path=output_p)
+
+    # If the request method is GET, render the form template with the list of directories
+    output_p = 'static/videos/random_images_video.mp4'
+    return render_template('choose_dir.html', directories=directories, output_path=output_p)
+
+S

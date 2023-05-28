@@ -1,0 +1,10 @@
+ female dressed as BLACK PANTHER, tattoos, (full body visible), looking at viewer, portrait, photography, detailed skin, realistic, photo-realistic, 8k, highly detailed, full length frame, High detail RAW color art, piercing, diffused soft lighting, shallow depth of field, sharp focus, hyperrealism, cinematic lighting
+
+Negative prompt: 3d, cartoon, anime, sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, girl, loli, young, large breasts, red eyes, muscular
+
+-------------------------------
+
+ professional full body shot of a Norwegian girl wearing only a two-piece swimsuit (beach), (dune), long hair, perfect female anatomy, (beautiful abs), beautiful detailed face, beautiful symmetrical face, cute natural makeup, photorealistic, hyperrealistic, realistic, extremely detailed, sharp focus, cinematic light, rays of the gods, intense sunset, film grain, professional color grading, digital art, very detailed, depth of field, 50mm, 8k
+
+Negative prompt: 3d, cartoon, anime, sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale))
+

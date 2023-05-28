@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Video</title>
+</head>
+<body>
+    <h1>Generate Video</h1>
+    <form method="POST" enctype="multipart/form-data" action="/generate_vid">
+        <label for="audio">Upload Audio:</label>
+        <input type="file" id="audio" name="audio" accept=".mp3" directory="static/audio_mp3">
+        <br>
+        <label for="image">Upload Image:</label>
+        <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png" directory="static/images/uploads">
+        <br>
+        <input type="submit" value="Generate">
+    </form>
+</body>
+</html>

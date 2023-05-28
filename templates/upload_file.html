@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>File Upload Form</title>
+  </head>
+  <body>
+    <h1>Upload a file</h1>
+
+    <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+      <input type="file" name="file">
+      <input type="submit" value="Upload">
+    </form>
+<br />
+    <p><a href="{{ url_for('index') }}">Return to index</a></p>
+  </body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My Flask App</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .resizedvideo {
+      width: 200px;
+      height: 200px;
+    }
+
+    .section {
+      margin-top: 50px;
+      width: 95%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .sectionl {
+      width: 35%;
+      display: flex;
+      flex-direction: column;
+      align-items: left;
+      justify-content: left;
+      height: 100vh;
+    }
+
+    .sectionr {
+      width: 35%;
+      display: flex;
+      flex-direction: column;
+      align-items: right;
+      justify-content: right;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+
+    <h1 style="color: brown;">Creating a speaking Avatar with A Flask App. <br />Click the video below for
+      instructions. </p>
+
+      <video controls class="resizedvideo">
+        <source src="static/assets/result_cl.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video><br />
+
+      <a href="{{ url_for('text_mp3') }}">Create the mp3</a><br />
+
+      <video controls class="resizedvideo">
+        <source src="static/assets/result_convert_mp3_wav.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video><br />
+      <a href="{{ url_for('convert_mp3_to_wav') }}">convert_mp3_to_wav</a><br />
+      <video controls class="resizedvideo">
+        <source src="static/assets/result_indian.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video><br />
+      <a href="{{ url_for('generate_vid') }}">Create a Video the same length as the wav Created</a><br />
+      <video controls class="resizedvideo">
+        <source src="static/assets/Water-blinking.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video><br />
+      <a href="{{ url_for('create_avatar') }}">Create Avatar</a><br />
+  </div>
+
+  <form id="convertForm">
+    <label for="audioFile">Upload MP3 File:</label>
+    <input type="file" id="audioFile" name="audio">
+    <br>
+    <input type="submit" value="Convert">
+  </form>
+
+  <form action="/search" method="GET">
+    <label for="search-term">Search:</label>
+    <input type="text" id="search-term" name="q">
+    <button type="submit">Search</button>
+  </form>
+
+  <footer class="footer">
+    <center>
+      <video controls class="resized-video">
+        <source src="static/assets/result_cl.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <img style="width: 30%; height: auto;" src="{{ url_for('static', filename='images/image2.jpg') }}"
+        alt="Example image"><br />&nbsp;&nbsp;&nbsp;
+    </center>
+    <h2 style="color: brown;">Links to YouTube Channels</h2>
+    <style>
+      .resized-video {
+        width: 25%;
+        height: auto;
+      }
+    </style>
+
+    <video controls class="resized-video">
+      <source src="static/assets/Talking_AI_Images.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <pre>
+        find . \( -type f -name "*.pyc" -o -type d -name "__pycache__" \) -delete
+        find . \( -type f -name "*.pyc" -o -type d -name "__pycache__" \) -delete
+      </pre>
+    <a href="https://www.youtube.com/@totallyinsaneart3345" target="_blank ">Totally Insane Art</a><br />
+    <a href="https://www.youtube.com/@JackNorthrup" target="_blank ">Jack Northrup</a><br />
+    <a href="https://app.prodia.com/#/" target="_blank ">prodia</a><br />
+    <a href="https://app.leonardo.ai/" target="_blank ">leonardo.ai</a><br />
+  </footer>
+  </div>
+
+</body>
+
+</html>
