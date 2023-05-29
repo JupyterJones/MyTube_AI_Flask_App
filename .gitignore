@@ -4,7 +4,7 @@
 /uploads
 
 # Ignore the static directory
-/static
+
 /checkpoints
 /Thin-Plate-Spline-Motion-Model
 /venv-back
