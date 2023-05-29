@@ -1,1 +1,2 @@
 checkpoints/wav2lip_gan.pth filter=lfs diff=lfs merge=lfs -text
+static/videos/final_output2D.mp4 filter=lfs diff=lfs merge=lfs -text
