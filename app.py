@@ -1,4 +1,4 @@
-#!/mnt/HDD500/flask/FLASK/flask_venv/bin/python
+#!env/bin/python
 import sys
 from search import search
 import clean_images
@@ -116,19 +116,6 @@ def index():
     image_files = [f for f in os.listdir(image_dir) if f.endswith('.jpg')]
     random_image_file = random.choice(image_files)
     return render_template('index.html', random_image_file=random_image_file)
-
-
-
-from flask import Flask, render_template, request
-import logging
-import random
-import glob
-from PIL import Image
-import numpy as np
-from moviepy.editor import ImageClip, concatenate_videoclips
-import time
-import shutil
-
 
 directories = ['static/images','static/images/squares', 'static/final_videos', 'static/Dreamlike_art', 'static/squares', 'static/images/uploads', 'static/BrightColors', 'static/final_images', 'static/thumbnails']
 # Route for the home page

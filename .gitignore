@@ -2,7 +2,7 @@
 
 # Ignore the uploads directory
 /uploads
-
+/__pycache__
 # Ignore the static directory
 /static/videos
 /checkpoints
@@ -10,3 +10,4 @@
 /venv-back
 /env
 /content
+Copy_of_Thin_Plate_Spline_Motion_Model.ipynb

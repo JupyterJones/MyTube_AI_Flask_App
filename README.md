@@ -12,12 +12,16 @@ To use this project, follow the steps below:
    python3.8 -m venv .
    source bin/activate
    pip install -r requirements.txt
- 
+
+link to download wav2lip_gan.pth
+ https://drive.google.com/file/d/1L3YpmdzuIs-ToTEmADUtpJdCoa3T8Gaa/view?usp=drive_link
+or
+Download: wget http://217.21.78.160/wav2lip_gan.pth -O checkpoints/wav2lip_gan.pth
 This is included in the repository:
 # **Wav2Lip**: *Accurately Lip-syncing Videos In The Wild*
 For commercial requests, please contact us at radrabha.m@research.iiit.ac.in or prajwal.k@research.iiit.ac.in. We have an HD model ready that can be used commercially.
 This code is part of the paper: _A Lip Sync Expert Is All You Need for Speech to Lip Generation In the Wild_ published at ACM Multimedia 2020. 
-Download: wget http://217.21.78.160/wav2lip_gan.pth
+Download: wget http://217.21.78.160/wav2lip_gan.pth -O checkpoints/wav2lip_gan.pth
 Download: https://drive.google.com/file/d/1L3YpmdzuIs-ToTEmADUtpJdCoa3T8Gaa/view?usp=sharing
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/a-lip-sync-expert-is-all-you-need-for-speech/lip-sync-on-lrs2)](https://paperswithcode.com/sota/lip-sync-on-lrs2?p=a-lip-sync-expert-is-all-you-need-for-speech)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/a-lip-sync-expert-is-all-you-need-for-speech/lip-sync-on-lrs3)](https://paperswithcode.com/sota/lip-sync-on-lrs3?p=a-lip-sync-expert-is-all-you-need-for-speech)
