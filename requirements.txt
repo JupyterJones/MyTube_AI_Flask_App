@@ -25,5 +25,4 @@ numba==0.56.4
 tqdm==4.63.0
 ffmpeg==1.4
 pydub==0.25.1
-PyQt5==5.15.9
-PyQtWebEngine==5.15.6
+

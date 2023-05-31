@@ -8,10 +8,18 @@ To use this project, follow the steps below:
 
 1. Create the Python 3.8 Environment, activate the virtual environment, and install the project dependencies by running the following commands:
 
-   ```bash
-   python3.8 -m venv .
-   source bin/activate
-   pip install -r requirements.txt
+   ```bash><br />
+   python3.8 -m venv env><br />
+   source env/bin/activate><br />
+   pip install -r requirements.txt><br />><br />
+
+
+
+
+
+If you Want to use the AppBrowser also run this in the terminal<br />
+pip install PyQt5==5.15.9<br />
+pip install PyQtWebEngine==5.15.6<br /><br />
 
 link to download wav2lip_gan.pth
  https://drive.google.com/file/d/1L3YpmdzuIs-ToTEmADUtpJdCoa3T8Gaa/view?usp=drive_link
