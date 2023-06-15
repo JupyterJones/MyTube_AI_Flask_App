@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Generated Video</title>
+  </head>
+  <body>
+    <h1>Generated Video</h1>
+    <a href="{{ url_for('index') }}">Home</a><br />
+    <p>Video path: {{ video_path }}</p>
+    <video width="512" height="768" controls>
+      <source src="{{ video_url }}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </body>
+</html>

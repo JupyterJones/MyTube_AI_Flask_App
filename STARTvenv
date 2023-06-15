@@ -1,3 +1,15 @@
+#!/bin/bash
+
+# Initialize Conda environment
+eval "$(conda shell.bash hook)"
 conda init --all
+
+# Deactivate any active environment
 conda deactivate
-source ./venv/bin/activate
+
+# Activate the virtual environment
+#source ~/miniconda3/bin/activate venv
+source /mnt/HDD500/MyTube_AI_Flask_App/ven/bin/activate
+# Run your desired commands here
+# For example:
+# python my_script.py

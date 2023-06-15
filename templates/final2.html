@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Final Video</title>
+</head>
+<body><center>
+    <h1>Final Video</h1>
+    <a href="{{ url_for('index') }}">HOME</a><br />
+    <video width="512" height="512" controls>
+        <source src="{{ url_for('static', filename=video_filez) }}" type="video/mp4">
+    </video>
+    <br />
+</center>
+</body>
+</html>
+

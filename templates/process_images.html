@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Upload Images to Blend</title>
+  </head>
+  <body>
+    <h1>Upload Images to Blend</h1>
+    <form action="{{ url_for('process_images') }}" method="post" enctype="multipart/form-data">
+      <p>Select the first image:</p>
+      <input type="file" name="image1"><br>
+      <p>Select the second image:</p>
+      <input type="file" name="image2"><br>
+      <p>Select the third image:</p>
+      <input type="file" name="image3"><br><br>
+      <input type="submit" value="Process Images">
+    </form>
+
+  <br>
+    <img src="{{ url_for('static', filename='images/image2.jpg') }}" alt="Example image"><br />
+  </body>
+</html>
+

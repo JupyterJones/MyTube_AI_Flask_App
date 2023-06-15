@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Title to Video</title>
+</head>
+<body>
+    <h1>Add Title to Video</h1>
+    <form method="POST">
+        <label for="video">Select a video:</label>
+        <select name="video" id="video">
+            {% for video in videos %}
+            <option value="{{ video }}">{{ video }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="title_page">Select a title page:</label>
+        <select name="title_page" id="title_page">
+            {% for title_page in title_pages %}
+            <option value="{{ title_page }}">{{ title_page }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <input type="submit" value="Add Title">
+    </form>
+    {% if final %}
+    <h2>Final Video:</h2>
+    <video src="{{ url_for('static', filename=final) }}" controls></video>
+    {% endif %}
+</body>
+</html>

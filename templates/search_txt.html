@@ -1,0 +1,16 @@
+# -------- search.html ----------------
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Page</title>
+</head>
+<body>
+    <h1>Search</h1>
+    <form method="POST" action="{{ url_for('search_txt') }}">
+        <input type="text" name="phrase" placeholder="Enter your search phrase">
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>
+
+

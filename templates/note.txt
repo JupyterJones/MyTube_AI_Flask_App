@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My Flask App</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</head>
+
+<body>
+  <div class="wrapper">
+    <header class="header">
+      <h1 style="color: brown;">Image Processing With Flask and Executeable Functions</h1><br />
+      <p>Below are links to various Image Processing Functions. </p>
+    </header>
+
+    <div class="content">
+      <a href="{{ url_for('get_gallery') }}">View Images</a><br />
+      <a href="{{ url_for('view_thumbs') }}">View Thumbnails</a><br />
+      <a href="{{ url_for('upload_file') }}">Upload Image</a><br />
+      <a href="{{ url_for('flask_info') }}">Video</a><br />
+      <a href="{{ url_for('add_text') }}">Add text to chat.txt</a><br />
+      <a href="{{ url_for('search_txt') }}">Search chat.txt</a><br />
+      <a href="{{ url_for('blend_pil') }}">upload and blend images.</a><br />
+      <a href="{{ url_for('add_border') }}">Add a border to an image.</a><br />
+      <a href="{{ url_for('process_images') }}">Process Images With Mask</a><br />
+      <a href="{{ url_for('text_mp3') }}">Create an mp3 from aText Entry</a><br />
+      <!--a href="{{ url_for('select_mp3') }}">convert_mp3_to_wav</a><br /-->
+      <a href="{{ url_for('convert_mp3_to_wav') }}">convert_mp3_to_wav</a><br />
+      <a href="{{ url_for('convert_image_to_video') }}">Convert Image to Video</a>
+      
+
+    
+       
+    </div>
+    <div class="content">
+      <a href="{{ url_for('generate_video') }}">Create an mp4 from video_resources</a><br />
+      <a href="{{ url_for('generate_video2') }}">Create an mp4 from Uploads</a><br />
+      <a href="{{ url_for('image_directories') }}">Choose Image directories</a><br />
+      <a href="{{ url_for('select_playmp3') }}">Select and play mp3 from audio_mp3/</a><br />
+      <a href="{{ url_for('make_animation') }}">Create an Animated Gif (20 images @ 1 per second.)</a><br />
+      <a href="{{ url_for('build_stackedvids') }}">Video Stacked on Images</a><br />
+      <a href="{{ url_for('build_stackedvid') }}">Two Video Stacked</a><br />
+      <a href="{{ url_for('title_page') }}">Create a title Page</a><br />
+      <a href="{{ url_for('add_title') }}">Add a Title to a Video</a><br />
+      <a href="{{ url_for('add_effects') }}">Add effects to a Video</a><br />
+      <a href="{{ url_for('choose_dir') }}">Choose a directory</a><br />
+
+      <form action="{{ url_for('clean_images_route') }}" method="POST">
+        <button type="submit">Clean Images</button>
+      </form>
+      <form action="/search" method="GET">
+        <label for="search-term">Search:</label>
+        <input type="text" id="search-term" name="q">
+        <button type="submit">Search</button>
+    </form>
+    </div>
+    <footer class="footer">
+      <center>
+        &nbsp;&nbsp;<img style="width: 30%; height: auto;"
+          src="{{ url_for('static', filename='images/' + random_image_file) }}"
+          alt="Example image">&nbsp;&nbsp;&nbsp;&nbsp;
+        <img style="width: 30%; height: auto;" src="{{ url_for('static', filename='images/image2.jpg') }}"
+          alt="Example image"><br />&nbsp;&nbsp;&nbsp;
+      </center>
+      <h2 style="color: brown;">Links to YouTube Channels</h2>
+      <a href="https://www.youtube.com/@totallyinsaneart3345" target="_blank ">Totally Insane Art</a><br />
+      <a href="https://www.youtube.com/@JackNorthrup" target="_blank ">Jack Northrup</a><br />
+      <a href="https://app.prodia.com/#/" target="_blank ">prodia</a><br />
+      <a href="https://app.leonardo.ai/" target="_blank ">leonardo.ai</a><br />
+    </footer>
+  </div>
+
+</body>
+
+</html>

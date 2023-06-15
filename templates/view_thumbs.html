@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Thumbnail Gallery</title>
+    <style>
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .thumbnail {
+            margin: 10px;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <h1>Thumbnail Gallery</h1>
+    <div class="gallery">
+        {% for image in image_list %}
+        <div class="thumbnail">
+            <a href="{{ image.url }}">
+                <img src="{{ image.url }}">
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

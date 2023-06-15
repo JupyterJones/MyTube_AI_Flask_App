@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Blend Images Using PIL</title>
+  </head>
+  <body>
+    <h1>Blend Images Using PIL</h1>
+    <form method="POST" enctype="multipart/form-data">
+      <label for="img1">Select the first image:</label>
+      <input type="file" id="img1" name="img1"><br><br>
+
+      <label for="img2">Select the second image:</label>
+      <input type="file" id="img2" name="img2"><br><br>
+
+      <label for="img3">Select the third image:</label>
+      <input type="file" id="img3" name="img3"><br><br>
+
+      <input type="submit" value="Blend Images">
+    </form>
+    
+    <img src="{{ url_for('static', filename='blended_pil.jpg') }}" alt="Blended Image">
+    
+  </body>
+</html>
+

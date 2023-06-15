@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Text</title>
+</head>
+<body>
+    <h1>Add Text</h1>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <form method="POST">
+        <label for="text">Text:</label>
+        <textarea name="text" id="text"></textarea>
+        <br>
+        <input type="submit" value="Add Text">
+    </form>
+</body>
+</html>

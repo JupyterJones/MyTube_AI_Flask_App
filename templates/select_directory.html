@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Directory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.10/themes/default/style.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.10/jstree.min.js"></script>
+    <script>
+        $(function () {
+            $('#directory').jstree({
+                "core": {
+                    "data": {
+                        "url": "/get_directory_list",
+                        "dataType": "json"
+                    }
+                },
+                "plugins": ["wholerow"]
+            });
+        });
+
+        $('#directory').on('changed.jstree', function (e, data) {
+            var selectedNode = data.instance.get_node(data.selected[0]);
+            $('#selected_directory').val(selectedNode.id);
+        });
+    </script>
+</head>
+<body>
+    <h1>Select Directory</h1>
+    <form action="//use_dir" method="POST" enctype="multipart/form-data">
+        <label for="directory">Select Directory:</label>
+        <input type="file" name="directory" id="directory" directory webkitdirectory mozdirectory>
+        <br>
+        <input type="submit" value="Select">
+    </form>
+</body>
+</html>
+

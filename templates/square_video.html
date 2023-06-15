@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Square Video</title>
+  </head>
+  <body>
+    <h1>Square Video</h1>
+    <p>Here is your square video:</p>
+         <video width="480" height="480" controls>
+          <source src="{{ url_for('static', filename='temp.mp4') }}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </body>
+    </html>
+    
+  </body>
+</html>

@@ -1,20 +1,17 @@
-#!env/bin/python
+#!/mnt/HDD500/FLASK/flask_venv/bin/python
 import sys
+sys.path.append('/mnt/HDD500/FLASK')
 from search import search
 import clean_images
 import subprocess
 import logging
 from flask import Flask, render_template, send_from_directory, request, redirect, url_for, flash
-from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
-from moviepy.video.io.VideoFileClip import VideoFileClip
-from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from flask import jsonify, send_file , Response
 import os
 from logging.handlers import RotatingFileHandler
 import datetime
 import glob
 import json
-import ffmpeg
 from werkzeug.utils import secure_filename
 import time
 import matplotlib.pyplot as plt
@@ -29,17 +26,15 @@ from io import BytesIO
 import base64
 import imageio
 import shutil
-import logging
-from pydub import AudioSegment
-# Define the Flask application
-app = Flask(__name__)  
-import sys
-import logging
-from logging.handlers import RotatingFileHandler
-from flask import Flask
 
 # Define the Flask application
-app = Flask(__name__)
+app = Flask(__name__)  
+
+# use the search function as a route
+app.add_url_rule('/search', 'search', search)
+def zip_lists(list1, list2):
+    return zip(list1, list2)
+app.jinja_env.filters['zip'] = zip_lists
 app.secret_key = os.urandom(24)
 
 # Create a logger object
@@ -78,15 +73,6 @@ app.config['THUMBNAILS_FOLDER'] = 'static/images/thumbnails'
 app.config['CHECKPOINT_PATH'] = 'checkpoints/wav2lip_gan.pth'
 app.config['AUDIO_PATH'] = 'content/sample_data/input_audio.wav'
 
-
-# use the search function as a route
-app.add_url_rule('/search', 'search', search)
-
-def zip_lists(list1, list2):
-    return zip(list1, list2)
-
-app.jinja_env.filters['zip'] = zip_lists
-
 def get_all_mp4_videos():
     mp4_videos = []
     for root, dirs, files in os.walk('static'):
@@ -117,73 +103,78 @@ def index():
     random_image_file = random.choice(image_files)
     return render_template('index.html', random_image_file=random_image_file)
 
-directories = ['static/images','static/images/squares', 'static/final_videos', 'static/Dreamlike_art', 'static/squares', 'static/images/uploads', 'static/BrightColors', 'static/final_images', 'static/thumbnails']
-# Route for the home page
-@app.route('/')
-def home():
-    return render_template('choose_dir.html', directories=directories)
 
-# Route for choosing a directory
+app.secret_key = os.urandom(24)
+
+app.config['UPLOAD_FOLDER'] = 'static/images/uploads'
+app.config['RESULTS_FOLDER'] = 'static/videos/results'
+app.config['THUMBNAILS_FOLDER'] = 'static/images/thumbnails'
+#app.config['CHECKPOINT_PATH'] = '/home/jack/Desktop/FlaskApp/Wav2Lip/checkpoints/wav2lip_gan.pth'
+#app.config['AUDIO_PATH'] = '/home/jack/Desktop/FlaskApp/Wav2Lip/content/sample_data/input_audio.wav'
+
+import logging
+
+# Create a formatter for the log messages
+formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+
+# Create a file handler to write log messages to a file
+handler = RotatingFileHandler('Logs/app.log', maxBytes=10000, backupCount=1)
+handler.setLevel(logging.DEBUG)
+handler.setFormatter(formatter)
+
+# Add the file handler to the Flask app logger
+app.logger.addHandler(handler)
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+directories = ['static/images', 'static/final_videos', 'static/tmp', 'static/BrightColors', 'static/final_images', 'static/thumbnails']
+
 @app.route('/choose_dir', methods=['GET', 'POST'])
 def choose_dir():
     if request.method == 'POST':
-        selected_directory = request.form.get('directory', directories)
-        TExt = "TEXT TEST"
-        logger.error('No file was selected: %s', TExt)
-        logger.debug('Debug was selected: %s', TExt)
+        selected_directory = request.form.get('directory', 'static/images')
         if selected_directory is None:
             # Handle the case where no directory is selected
-            logger.error('No directory selected')
             return 'No directory selected!'
-        # Rest of the code...
-        # Use the selected_directory variable in your logic to generate the video
-        # Make sure to update the paths according to the selected directory
-        logger.debug('Selected directory: %s', selected_directory)
-        # Get the list of image files in the selected directory
-        image_filenames = random.sample(glob.glob(selected_directory + '/*.jpg'), 10)
-        logger.debug('Selected image filenames: %s', image_filenames)
         
+        # rest of the code...
+        logging.debug("Selected directory: %s", selected_directory)
+     
+        # Get the list of image files in the selected directory
+        image_filenames = random.sample(glob.glob(selected_directory + '/*.jpg'),30)
         image_clips = []
         for filename in image_filenames:
             # Open the image file and resize it to 512x768
-            logger.debug('Processing image: %s', filename)
             image = Image.open(filename)
-            #image = image.resize((512, 768), Image.ANTIALIAS)
+            image = image.resize((512, 768), Image.ANTIALIAS)
+            logging.debug("Opened image: %s", filename)
             # Convert the PIL Image object to a NumPy array
             image_array = np.array(image)
             # Create an ImageClip object from the resized image and set its duration to 1 second
             image_clip = ImageClip(image_array).set_duration(1)
+        
             # Append the image clip to the list
             image_clips.append(image_clip)
-
-        logger.debug('Number of image clips: %d', len(image_clips))
-
+    
         # Concatenate all the image clips into a single video clip
         video_clip = concatenate_videoclips(image_clips, method='compose')
         timestr = time.strftime("%Y%m%d-%H%M%S")
         # Set the fps value for the video clip
         video_clip.fps = 24
         # Write the video clip to a file
-        video_file = f'static/videos/random_images_{timestr}_video.mp4'
+        video_file = 'static/videos/random_images'+timestr+'Xvideo.mp4'
         output_p = 'static/videos/random_images_video.mp4'
-        logger.debug('Output video file path: %s', video_file)
-        logger.debug('Final video file path: %s', output_p)
-        
         video_clip.write_videofile(video_file, fps=24)
-        
         try:
             shutil.copy(video_file, output_p)
         except Exception as e:
-            logger.error('Error occurred while copying file: %s', str(e))
-            return f"Error occurred while copying file: {str(e)}"
+            logging.error("Error occurred while copying file: %s", str(e))
 
-        # Return the rendered template with the list of directories and output path
+        # Return a message to the client
         return render_template('choose_dir.html', directories=directories, output_path=output_p)
 
-    # If the request method is GET, render the form template with the list of directories
     output_p = 'static/videos/random_images_video.mp4'
+    # If the request method is GET, render the form template with the list of directories
     return render_template('choose_dir.html', directories=directories, output_path=output_p)
-
 
 
 # Define route to display upload form
@@ -327,7 +318,7 @@ def view_thumbs():
 @app.route('/images/uploads/<filename>')
 def image(filename):
     # Define the directory where the images are located
-    image_directory = '/mnt/HDD500/flask/FLASK/static/images/uploads'
+    image_directory = '/mnt/HDD500/FLASK/static/images/uploads'
     # Generate the full path to the requested image file
     image_path = os.path.join(image_directory, filename)
     # Determine the file type based on the file extension
@@ -519,14 +510,15 @@ def select_playmp3():
 def generate_video():
     # Get the pythonlist of image files in the static/final_images/ directory  
     #image_filenames = random.sample(glob.glob('static/final_images/*.jpg'),20)
-    image_filenames = random.sample(glob.glob('static/video_resources/*.jpg'),30)
+    #image_filenames = random.sample(glob.glob('static/video_resources/*.jpg'),30)
+    image_filenames = random.sample(glob.glob('static/images/uploadd/*.jpg'),30)
     print(image_filenames,end="-")
    
     image_clips = []
     for filename in image_filenames:
         # Open the image file and resize it to 512x768
         image = Image.open(filename)
-        image = image.resize((512, 768), Image.ANTIALIAS)
+        image = image.resize((512, 666), Image.ANTIALIAS)
         print(image)
         # Convert the PIL Image object to a NumPy array
         image_array = np.array(image)
@@ -542,19 +534,18 @@ def generate_video():
     # Set the fps value for the video clip
     video_clip.fps = 24
     # Write the video clip to a file
-    video_url = 'static/videos/random_images'+timestr+'video.mp4'
-    video_clip.write_videofile(video_url, fps=24)
+    video_clip.write_videofile('static/videos/random_images'+timestr+'video.mp4', fps=24)
     
     # Return a message to the client
-    return render_template('generate_video.html', video_url=video_url)
+    return 'Video generated successfully!'
 # List of directories to choose from
 
 
 @app.route('/generate_video2')
 def generate_video2():
     # Get the pythonlist of image files in the static/final_images/ directory  
-    image_filenames = random.sample(glob.glob('static/final_images/*.jpg'),25)
-    #image_filenames = random.sample(glob.glob('static/images/uploads/*.jpg'),30)
+    #image_filenames = random.sample(glob.glob('static/final_images/*.jpg'),25)
+    image_filenames = random.sample(glob.glob('static/images/uploads/*.jpg'),30)
     print(image_filenames,end="-")
    
     image_clips = []
@@ -582,8 +573,8 @@ def generate_video2():
     video_clip.write_videofile('static/videos/TEMPvideo.mp4', fps=24)
     
     # Return a message to the client
-    #return render_template('generate_video2.html', video_url='/static/videos/TEMPvideo.mp4')
-    return render_template('generate_video2.html' ,video_url='/static/videos/TEMPvideo.mp4', video_path=video_path)
+    return render_template('generate_video2.html', video_url='/static/videos/TEMPvideo.mp4')
+    #return render_template('generate_video2.html' ,video_url='/static/videos/TEMPvideo.mp4', video_path=video_path)
 
 
 @app.route('/square_video/<path:directory>')
@@ -600,7 +591,7 @@ def square_video(directory=None):
         return "Error: no image files found in directory"
     
     # Randomly select 50 image files from the list
-    image_filenames = random.sample(image_filenames, 20)
+    image_filenames = random.sample(image_filenames, 50)
     
     image_clips = []
     for filename in image_filenames:
@@ -656,19 +647,22 @@ def image_directories():
 @app.route('/title_page', methods=['GET', 'POST'])
 def title_page():
     if request.method == 'POST':
-        # Get the text input from the user
+        # Get the text input and image file from the form data
         text = request.form['text']
-        app.logger.debug('XXXXXXXXXXXXX')
-        app.logger.info('This is a test message')
-        # Create a transparent image with size 800x600
-        IMAGE = random.choice(glob.glob("static/LineArt/*.jpg"))
-        image = Image.open(IMAGE)
+        image = request.files['image']
         
+        # Save the image to a temporary location
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(image.filename))
+        image.save(image_path)
+        
+        # Open the image file
+        image = Image.open(image_path)
+               
         # Create a drawing context on the image
         draw = ImageDraw.Draw(image)
         
         # Define the font and font size for the text
-        font = ImageFont.truetype('static/fonts/OpenSansBold.ttf', 40)
+        font = ImageFont.truetype('static/fonts/OpenSansBold.ttf', 50)
         # Split the text by newline characters
         lines = text.split("  ")
 
@@ -697,12 +691,21 @@ def title_page():
         
         # Save the image to the static folder with a unique filename
         inc = text.replace(" ","")
-        filename = os.path.join('title_pages', f'{inc}_{hash(text)}.png')
-        image.save(filename)
+        filenamex = os.path.join(app.static_folder, 'title_pages', f'{inc}_{hash(text)}.png')
+        image.save(filenamex)
+        filename = 'static/title_pages/title_page.png'
+        shutil.copy(filenamex , filename)
+        logging.error('filename: %s', filename)
         
-        return render_template('title_page.html', filename=filename)
-        
-    return render_template('title_page.html')
+        #print(inc[:5])
+        # Remove the temporary image file
+        #os.remove(image_path)
+        filenamev = 'title_pages/title_page.png'
+        # Return the rendered template with the image filename
+        return render_template('title_page.html', filename=filenamev)
+    filenamev = 'title_pages/title_page.png'    
+    return render_template('title_page.html', filename=filenamev)
+
 
 from flask import Flask, render_template, request
 import os
@@ -718,7 +721,7 @@ def add_title():
     if request.method == 'POST':
         app.logger.debug('Entering POST request handler for /add_title')
         # Get the paths of the selected video and title page
-        video_path = os.path.join(app.static_folder, 'square_vids', request.form['video'])
+        video_path = os.path.join(app.static_folder, 'videos', request.form['video'])
         title_page_path = os.path.join(app.static_folder, 'title_pages', request.form['title_page'])
         app.logger.debug(f'video_path: {video_path}')
         app.logger.debug(f'title_page_path: {title_page_path}')
@@ -778,7 +781,7 @@ def build_stackedvids():
     # Export the final clip as a video file
     timestr = time.strftime("%Y%m%d-%H%M%S")
     video_filename = 'static/stacked_vids/stacked_vids'+timestr+'video.mp4'
-    final_clip_path = 'static/stacked_vids/stacked_videos.mp4'
+    final_clip_path = 'static/stacked_vids/stacked_video.mp4'
     final_clip.write_videofile(final_clip_path)
     final_clip.write_videofile(video_filename)
     
@@ -830,7 +833,7 @@ def clean_images_route():
 
 @app.route('/get_gallery')
 def get_gallery():
-    image_dir = '/mnt/HDD500/flask/FLASK/static/images/uploads'
+    image_dir = '/home/jack/Desktop/FLASK/static/images/uploads'
     image_names = os.listdir(image_dir)
     return render_template('get_gallery.html', image_names=image_names)
 
@@ -853,7 +856,6 @@ def add_effects():
             <input type="submit" value="Submit">
         </form>
     '''
-
 @app.route('/video', methods=['GET', 'POST'])
 def process_video():
     DIR = "static/"
@@ -882,7 +884,7 @@ def process_video():
     command4 = f'ffmpeg -i "{DIR}mpdecimate.mp4" -i "{DIR}mpdecimate.mp4" -i "{DIR}mpdecimate.mp4" -i "{DIR}mpdecimate.mp4" -i "{DIR}mpdecimate.mp4" -filter_complex "[0:v]trim=duration=15[v0];[1:v]trim=duration=15[v1];[2:v]trim=duration=15[v2];[3:v]trim=duration=15[v3];[4:v]trim=duration=15[v4];[v0][v1][v2][v3][v4]concat=n=5:v=1:a=0" -c:v libx264 -pix_fmt yuv420p -shortest -y {video_file}'
     subprocess.run(command4, shell=True, stderr=subprocess.PIPE, universal_newlines=True)
     now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    diR = f"{DIR}/square_videos/"
+    diR = f"{DIR}/videos/"
     logging.info(f'diR: f"{diR}mpdecimate.mp4"')
     shutil.copy(f"{video_file}", f"{diR}{now}_outputALL.mp4")
     logging.info(f'diR: {diR}mpdecimate.mp4')
@@ -932,18 +934,103 @@ def join_videos(video_paths, output_path):
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     new_output_path = f'static/videos/concatenated_{timestamp}XX.mp4'
     shutil.copy(output_path, new_output_path)
-    
-@app.route('/select_mp3', methods=['GET', 'POST'])
-def select_mp3():
-    mp3_dir = os.path.join(app.static_folder, 'audio_mp3')
-    mp3_files = [f for f in os.listdir(mp3_dir) if f.endswith('.mp3')]
-
+@app.route('/final', methods=['GET', 'POST'])
+def final():
     if request.method == 'POST':
-        selected_mp3 = request.form['selected_mp3']
-        # Process the selected MP3 file here
-        return 'Selected MP3: {}'.format(selected_mp3)
-    else:
-        return render_template('select_mp3.html', mp3_files=mp3_files)
+        DIR = "static/"
+        input_video = request.files['input_video']
+        # Save the uploaded video to a file
+        input_video.save(f"{DIR}saved_videos/input_video.mp4")
+        logging.info("Input video saved", f"{DIR}saved_videos/input_video.mp4")
+        logging.info("xxxxxxxxx1")
+        VIDEOS = f"{DIR}saved_videos/input_video.mp4"
+        now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"{DIR}/saved_videos/_file_{current_datetime}.mp4"
+        logging.info("xxxxxxxxx2")
+        logging.info(f"107-Running ffmpeg command to convert JPGs to video",{filename})
+        ffmpeg_jpg_command = f"ffmpeg -hide_banner -i {DIR}%*.jpg -vf 'scale=512:512,setsar=1:1' -c:v libx264 -r 30 -pix_fmt yuv420p -y {VIDEOS}"
+        subprocess.run(ffmpeg_jpg_command, shell=True)
+        logging.info("xxxxxxxxx3")
+        logging.info("Running ffmpeg command to process video")
+        ffmpeg_mp4_command = f"ffmpeg -hide_banner -i {VIDEOS} -filter:v 'setpts=20*PTS,minterpolate=fps=25:scd=none:me_mode=bidir:vsbmc=1:search_param=200' -t 58 -y {filename}"
+        subprocess.run(ffmpeg_mp4_command, shell=True)
+        logging.info("xxxxxxxxx4")
+        MUSIC = "/mnt/HDD500/collections/Music/Music-Copyright_Free_Music.mp3"
+        directory_name = "your_directory_name"
+        FINAL = f"static/saved_videos/{directory_name}{current_datetime}512.mp4"
+
+        logging.info("Running final ffmpeg command")
+        random_number = str((os.urandom(2).hex()))
+        ffmpeg_final_command = f"ffmpeg -ss 0 -i {filename} -ss {random_number} -i {MUSIC} -map 0:v -map 1:a -c:v copy -c:a aac -shortest -y {FINAL}"
+        subprocess.run(ffmpeg_final_command, shell=True)
+
+        logging.info("Video processing completed")
+        shutil.copy(f"{FINAL}", f"static/saved_videos/final_outputALL.mp4")
+        
+        return render_template('final2.html', video_file=f"{FINAL}")
+
+    return render_template('upload.html')
+@app.route('/maketext', methods=['POST'])
+def maketext():
+    if request.method == 'POST':
+        input_file = request.files['input_file']
+        input_file.save('input.txt')  # Save the uploaded text file
+
+        output_file = 'static/saved_videos/outputT.mp4'  # Output video file name
+
+        # Call the maketext_mp4 function
+        maketext_mp4('input.txt', output_file)
+
+        return redirect(url_for('resultz'))
+
+@app.route('/resultz')
+def resultz():
+    output_file = 'saved_videos/outputT.mp4'
+    timestamp = int(time.time())
+    return render_template('resultz.html', output_file=output_file, timestamp=timestamp)
+
+
+def maketext_mp4(input_file, output_file):
+    # Generate the ffmpeg command to create the text video
+    ffmpeg_command = f"ffmpeg -f lavfi -i 'color=c=blue:s=512x512' -vf 'drawtext=textfile={input_file}:fontsize=24:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2' -c:v libx264 -pix_fmt yuv420p -t 10 -y {output_file}"
+    subprocess.run(ffmpeg_command, shell=True)
+
+def convert_text_file(input_file, output_file):
+    with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
+        for line in f_in:
+            words = line.split()
+            if words:
+                current_line = words[0]
+                for word in words[1:]:
+                    if len(current_line) + len(word) + 1 <= 50:
+                        current_line += ' ' + word
+                    else:
+                        f_out.write(current_line + '\n')
+                        current_line = word
+                f_out.write(current_line + '\n')
+
+
+@app.route('/format_text', methods=['GET', 'POST'])
+def format_text():
+    if request.method == 'POST':
+        # Get the uploaded text file
+        input_file = request.files['input_file']
+        input_file.save('input.txt')
+
+        # Define the output file name
+        output_file = 'static/text/formatted.txt'
+
+        # Convert and format the text file
+        convert_text_file('input.txt', output_file)
+
+        # Read the formatted text file
+        with open(output_file, 'r') as f:
+            formatted_text = f.read()
+
+        return render_template('formated_text.html', formatted_text=formatted_text)
+
+    return render_template('format_text.html')
 @app.route('/convert_mp3_to_wav', methods=['GET', 'POST'])
 def convert_mp3_to_wav():
     if request.method == 'POST':
@@ -997,89 +1084,7 @@ def convert_image_to_video():
 def get_audio_duration(audio_file):
     audio = AudioSegment.from_file(audio_file)
     duration = audio.duration_seconds
-    return duration
-
-def customConvert(silf, palette, dither=False):
-    ''' Convert an RGB or L mode image to use a given P image's palette.
-        PIL.Image.quantize() forces dither = 1. 
-        This custom quantize function will force it to 0.
-        https://stackoverflow.com/questions/29433243/convert-image-to-specific-palette-using-pil-without-dithering
-    '''
-
-    silf.load()
-
-    # use palette from reference image made below
-    palette.load()
-    im = silf.im.convert("P", 0, palette.im)
-    # the 0 above means turn OFF dithering making solid colors
-    return silf._new(im)
-
-@app.route("/process_image")
-def process_image():
-    palette = [ 
-        0,0,0,
-        0,0,255,
-        15,29,15,
-        26,141,52,
-        41,41,41,
-        65,105,225,
-        85,11,18,
-        128,0,128,
-        135,206,236,
-        144,238,144,
-        159,30,81,
-        165,42,42,
-        166,141,95,
-        169,169,169,
-        173,216,230,
-        211,211,211,
-        230,208,122,
-        245,245,220,
-        247,214,193,
-        255,0,0,
-        255,165,0,
-        255,192,203,
-        255,255,0,
-        255,255,255
-        ] + [0,] * 232 * 3
-
-    files = random.choice(glob.glob("static/squares/*.jpg"))
-    paletteImage = Image.new('P', (1, 1), 0)
-    paletteImage.putpalette(palette)
-    # open the source image
-    imageOrginal = Image.open(files).convert('RGB')
-    # convert it using our palette image
-    cnt = random.randint(0,2000)
-    imageCustomConvert = customConvert(imageOrginal, paletteImage,  dither=False).convert('RGB')
-    processed_image = "static/processed/"+str(cnt)+"square_imageCustomConvert.jpg"
-    imageCustomConvert.save(processed_image)
-    return render_template('processed_image.html', processed_image=processed_image)
-app.config['AUDIO_PATH'] = 'sample_data'
-app.config['VIDEO_PATH'] = 'sample_data'
-app.config['ALLOWED_EXTENSIONS'] = {'mp3', 'wav'}
-app.config['CHECKPOINT_PATH'] = 'checkpoints/wav2lip_gan.pth'
-
-@app.route('/create_avatar', methods=['GET', 'POST'])
-def create_avatar():
-    if request.method == 'POST':
-        #check_point = os.path.join(app.config['CHECKPOINT_PATH'], 'checkpoints/wav2lip_gan.pth')
-        check_point = 'checkpoints/wav2lip_gan.pth'
-        wav_filename = os.path.join(app.config['AUDIO_PATH'], 'input_audio.wav')
-        video_path = os.path.join(app.config['VIDEO_PATH'], 'input_video.mp4')
-        logger.info(f'Video path: {video_path}')
-        build_avatar = f"python inference.py --checkpoint_path {check_point} --face {video_path} --audio {wav_filename}"
-
-        def generate_output():
-            process = subprocess.Popen(build_avatar, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-            for line in iter(process.stdout.readline, b''):
-                yield line
-
-        return Response(generate_output(), mimetype='text/plain')
-    else:
-        return render_template('create_avatar.html')
-    
-    
+    return duration  
 @app.route('/generate_vid', methods=['GET', 'POST'])
 def generate_vid():
     current_datetime = datetime.now()
@@ -1130,7 +1135,35 @@ def convert_audio():
         wav_filename = 'sample_data/input_audio.wav'
         convert_mp3_towav(mp3_filename, wav_filename)
         return f'Audio converted: {wav_filename}'
-      return render_template('convert_audio.html')    
+      return render_template('convert_audio.html')
+
+app.config['AUDIO_PATH'] = 'sample_data'
+app.config['VIDEO_PATH'] = 'sample_data'
+app.config['ALLOWED_EXTENSIONS'] = {'mp3', 'wav'}
+app.config['CHECKPOINT_PATH'] = 'checkpoints/wav2lip_gan.pth'
+          
+@app.route('/create_avatar', methods=['GET', 'POST'])
+def create_avatar():
+    if request.method == 'POST':
+        #check_point = os.path.join(app.config['CHECKPOINT_PATH'], 'checkpoints/wav2lip_gan.pth')
+        check_point = 'checkpoints/wav2lip_gan.pth'
+        wav_filename = os.path.join(app.config['AUDIO_PATH'], 'input_audio.wav')
+        video_path = os.path.join(app.config['VIDEO_PATH'], 'input_video.mp4')
+        logger.info(f'Video path: {video_path}')
+        build_avatar = f"python inference.py --checkpoint_path {check_point} --face {video_path} --audio {wav_filename}"
+
+        def generate_output():
+            process = subprocess.Popen(build_avatar, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+            for line in iter(process.stdout.readline, b''):
+                yield line
+
+        return Response(generate_output(), mimetype='text/plain')
+    else:
+        return render_template('create_avatar.html')
+    
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
